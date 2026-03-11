@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Holingu Lawyers — Analytical Repository</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Mono:wght@300;400;500&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#080B0F;--ink2:#0D1117;--ink3:#121820;
+  --bdr:#1E2733;--bdr2:#263040;
+  --gold:#D4A84B;--gold2:#B8902E;--gf:rgba(212,168,75,0.08);
+  --tx:#E2DDD4;--tx2:#8A9098;--tx3:#4A5260;
+  --gn:#4A9B6F;--rd:#9B4A4A;--bl:#4A6E9B;--pu:#6E4A9B;
+}
+html,body{height:100%;overflow:hidden;background:var(--ink);font-family:'Crimson Pro',Georgia,serif;color:var(--tx)}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+.shell{display:flex;height:100vh;width:100vw;overflow:hidden}
+.sidebar{width:220px;min-width:220px;background:var(--ink2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(212,168,75,.04) 0%,transparent 100%)}
+.logo-mark{width:36px;height:36px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--ink);margin-bottom:11px;box-shadow:0 2px 12px rgba(212,168,75,.25)}
+.logo-name{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--tx);line-height:1.3}
+.logo-sub{font-family:'DM Mono',monospace;font-size:8px;color:var(--tx3);letter-spacing:.14em;text-transform:uppercase;margin-top:2px}
+.logo-location{display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr)}
+.flag{display:flex;gap:2px}.fr{width:10px;height:6px;background:#CE1126;border-radius:1px}.fb{width:10px;height:6px;background:#000;border-radius:1px}
+.logo-city{font-family:'DM Mono',monospace;font-size:8px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase}
+.sb-nav{flex:1;overflow-y:auto;padding:14px 10px 8px}
+.nav-lbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--tx3);letter-spacing:.18em;text-transform:uppercase;padding:0 8px;margin-bottom:7px}
+.ni{display:flex;align-items:center;gap:9px;padding:9px;border-radius:3px;cursor:pointer;margin-bottom:2px;border:1px solid transparent;font-size:13px;color:var(--tx2);transition:all .15s;user-select:none}
+.ni:hover{background:var(--ink3);color:var(--tx)}
+.ni.active{background:var(--gf);border-color:rgba(212,168,75,.2);color:var(--gold)}
+.ni-badge{margin-left:auto;background:var(--rd);color:#fff;font-family:'DM Mono',monospace;font-size:8px;padding:1px 5px;border-radius:10px}
+.divider{height:1px;background:var(--bdr);margin:13px 0 11px}
+.sb-footer{padding:14px 17px;border-top:1px solid var(--bdr)}
+.avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold2),#7A5A10);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink);font-weight:bold;font-family:'DM Mono',monospace;flex-shrink:0}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.png-banner{background:linear-gradient(90deg,rgba(206,17,38,.08),rgba(212,168,75,.06));border-bottom:1px solid var(--bdr);padding:5px 22px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.topbar{height:52px;min-height:52px;background:var(--ink2);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 22px;gap:12px;flex-shrink:0}
+.tb-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--tx);flex:1;line-height:1.2}
+.tb-sub{font-family:'DM Mono',monospace;font-size:8px;color:var(--tx3);letter-spacing:.1em}
+.sbar{display:flex;align-items:center;gap:7px;background:var(--ink3);border:1px solid var(--bdr);border-radius:4px;padding:7px 11px;transition:border-color .2s}
+.sbar:focus-within{border-color:var(--gold)}
+.sbar input{background:none;border:none;outline:none;font-family:'Crimson Pro',serif;font-size:13px;color:var(--tx);width:175px;caret-color:var(--gold)}
+.sbar input::placeholder{color:var(--tx3)}
+.btn{display:inline-flex;align-items:center;gap:5px;background:var(--ink3);border:1px solid var(--bdr);color:var(--tx2);cursor:pointer;padding:7px 14px;border-radius:3px;font-family:'Crimson Pro',serif;font-size:12px;transition:all .15s;white-space:nowrap;user-select:none}
+.btn:hover{border-color:var(--gold);color:var(--gold)}
+.btn.pr{background:var(--gold);border-color:var(--gold);color:var(--ink);font-weight:700}
+.btn.pr:hover{background:var(--gold2)}
+.content{flex:1;overflow-y:auto;padding:22px}
+.card{background:var(--ink2);border:1px solid var(--bdr);border-radius:5px;overflow:hidden;margin-bottom:14px}
+.ch{padding:13px 16px 10px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
+.ct{font-family:'Playfair Display',serif;font-size:13px;color:var(--tx)}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:16px}
+.sc{background:var(--ink2);border:1px solid var(--bdr);border-radius:5px;padding:16px 14px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.s1::before{background:linear-gradient(90deg,var(--gold),transparent)}
+.s2::before{background:linear-gradient(90deg,var(--gn),transparent)}
+.s3::before{background:linear-gradient(90deg,var(--rd),transparent)}
+.s4::before{background:linear-gradient(90deg,var(--bl),transparent)}
+.sl{font-family:'DM Mono',monospace;font-size:8px;color:var(--tx3);letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px}
+.sv{font-family:'Playfair Display',serif;color:var(--tx);line-height:1;margin-bottom:5px}
+.sd{font-family:'DM Mono',monospace;font-size:9px}
+.up{color:var(--gn)}.dn{color:var(--rd)}.am{color:var(--gold)}
+.badge{display:inline-flex;align-items:center;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:2px}
+.b-active{background:rgba(74,155,111,.15);color:var(--gn);border:1px solid rgba(74,155,111,.3)}
+.b-closed,.b-archived{background:rgba(74,82,96,.3);color:var(--tx3);border:1px solid var(--bdr)}
+.b-hold,.b-on_hold{background:rgba(74,110,155,.15);color:var(--bl);border:1px solid rgba(74,110,155,.3)}
+.b-crit,.b-critical{background:rgba(155,74,74,.15);color:var(--rd);border:1px solid rgba(155,74,74,.3)}
+.b-deal,.b-med,.b-medium{background:rgba(212,168,75,.1);color:var(--gold);border:1px solid rgba(212,168,75,.25)}
+.b-deed,.b-mining{background:rgba(110,74,155,.15);color:var(--pu);border:1px solid rgba(110,74,155,.3)}
+.b-low{background:rgba(74,155,111,.15);color:var(--gn);border:1px solid rgba(74,155,111,.3)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g75{display:grid;grid-template-columns:7fr 5fr;gap:15px}
+.li{display:flex;align-items:flex-start;gap:11px;padding:11px 15px;border-bottom:1px solid var(--bdr);cursor:pointer;transition:background .1s}
+.li:hover{background:var(--ink3)}.li:last-child{border-bottom:none}
+.ri{display:flex;align-items:flex-start;gap:9px;padding:11px 15px;border-bottom:1px solid var(--bdr);transition:background .1s}
+.ri:hover{background:var(--ink3)}.ri:last-child{border-bottom:none}
+.rdot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.rh{background:var(--rd);box-shadow:0 0 6px rgba(155,74,74,.5)}
+.rm{background:var(--gold);box-shadow:0 0 5px rgba(212,168,75,.4)}
+.dli{display:flex;gap:13px;align-items:flex-start;padding:11px 15px;border-bottom:1px solid var(--bdr)}
+.dli:last-child{border-bottom:none}
+.dldb{min-width:38px;text-align:center;background:var(--ink3);border:1px solid var(--bdr2);border-radius:3px;padding:5px 3px}
+.dlday{font-family:'Playfair Display',serif;font-size:19px;line-height:1;color:var(--gold)}
+.dlmon{font-family:'DM Mono',monospace;font-size:8px;color:var(--tx3);letter-spacing:.07em;text-transform:uppercase;margin-top:1px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--bdr)}
+th{font-family:'DM Mono',monospace;font-size:8px;color:var(--tx3);letter-spacing:.13em;text-transform:uppercase;padding:9px 14px;text-align:left;font-weight:500;white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--tx2)}
+tbody tr{transition:background .1s;cursor:pointer}tbody tr:hover{background:var(--ink3)}tbody tr:last-child td{border-bottom:none}
+.tab-row{display:flex;border-bottom:1px solid var(--bdr);margin-bottom:16px}
+.tbtn{padding:9px 18px;background:none;border:none;border-bottom:2px solid transparent;font-family:'Crimson Pro',serif;font-size:13px;color:var(--tx3);cursor:pointer;transition:all .15s;white-space:nowrap}
+.tbtn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.ar{background:var(--ink3);border:1px solid var(--bdr2);border-left:3px solid var(--gold);border-radius:3px;padding:13px 15px;margin-bottom:9px}
+.chip-row{display:flex;gap:7px;margin-bottom:13px;overflow-x:auto}
+.chip{padding:5px 13px;border-radius:20px;border:1px solid var(--bdr);background:var(--ink3);color:var(--tx3);font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.09em;cursor:pointer;white-space:nowrap;transition:all .15s;user-select:none}
+.chip:hover,.chip.active{border-color:var(--gold);background:var(--gf);color:var(--gold)}
+.sec-lbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--tx3);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px}
+.skeleton{background:linear-gradient(90deg,var(--bdr) 25%,var(--bdr2) 50%,var(--bdr) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:3px;height:16px;margin-bottom:8px}
+.loading-card{padding:18px 16px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.pulsing{animation:pulse 1.4s infinite}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;backdrop-filter:blur(4px);align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--ink2);border:1px solid var(--bdr2);border-radius:8px;padding:28px;width:500px;max-height:85vh;overflow-y:auto;animation:su .2s ease}
+.field{margin-bottom:13px}
+.flbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--tx3);letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:5px}
+.fi,.fs{width:100%;background:var(--ink3);border:1px solid var(--bdr2);border-radius:3px;padding:9px 11px;color:var(--tx);font-family:'Crimson Pro',serif;font-size:14px;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.fi:focus,.fs:focus{border-color:var(--gold)}.fs option{background:var(--ink3)}
+.notice-ok{padding:11px 14px;background:rgba(74,155,111,.08);border:1px solid rgba(74,155,111,.3);border-radius:4px;margin-top:12px}
+@keyframes su{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+.api-badge{font-family:'DM Mono',monospace;font-size:8px;color:var(--gn);background:rgba(74,155,111,.1);border:1px solid rgba(74,155,111,.25);padding:2px 7px;border-radius:2px;margin-left:6px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="logo-mark">H</div>
+      <div class="logo-name">Holingu Lawyers</div>
+      <div class="logo-sub">Analytical Repository</div>
+      <div class="logo-location">
+        <div class="flag"><div class="fr"></div><div class="fb"></div></div>
+        <div class="logo-city">Port Moresby, PNG</div>
+      </div>
+    </div>
+    <div class="sb-nav">
+      <div class="nav-lbl" style="margin-bottom:8px">Navigation</div>
+      <div class="ni active" onclick="goTo('dashboard')" id="nav-dashboard"><span>◈</span><span>Intelligence Dashboard</span></div>
+      <div class="ni" onclick="goTo('vault')"     id="nav-vault"><span>⬡</span><span>The Vault</span></div>
+      <div class="ni" onclick="goTo('analyst')"   id="nav-analyst"><span>◎</span><span>The Analyst</span></div>
+      <div class="ni" onclick="goTo('drafter')"   id="nav-drafter"><span>✦</span><span>The Drafter</span></div>
+      <div class="ni" onclick="goTo('deadlines')" id="nav-deadlines"><span>⚑</span><span>Deadlines & Risks</span><span class="ni-badge" id="risk-badge">—</span></div>
+      <div class="divider"></div>
+      <div class="nav-lbl" style="margin-bottom:8px">Recent Matters</div>
+      <div id="sidebar-matters"><div style="padding:6px 9px;font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3)">Loading…</div></div>
+    </div>
+    <div class="sb-footer">
+      <div style="display:flex;align-items:center;gap:9px">
+        <div class="avatar">AH</div>
+        <div><div style="font-size:11px;color:var(--tx)">Adv. A. Holingu</div><div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em">Senior Partner</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="png-banner">
+      <div class="flag"><div class="fr"></div><div class="fb"></div></div>
+      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.1em">Papua New Guinea · Independent State · Laws of Papua New Guinea Apply</span>
+      <span style="margin-left:auto;font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3)">Currency: PGK — Papua New Guinean Kina</span>
+      <span class="api-badge" id="api-status">⬤ connecting…</span>
+    </div>
+    <div class="topbar">
+      <div style="flex:1"><div class="tb-title" id="screen-title">Intelligence Dashboard</div><div class="tb-sub" id="screen-sub">Firm-wide analytical overview · Port Moresby</div></div>
+      <div class="sbar"><span style="color:var(--tx3);font-size:14px">⌕</span><input id="global-search" placeholder="Search vault, matters, clauses…" oninput="debounceSearch()"/></div>
+      <button class="btn" onclick="openModal()">+ New Matter</button>
+      <button class="btn pr">↑ Upload PDF</button>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div style="font-family:'Playfair Display',serif;font-size:19px;color:var(--tx);margin-bottom:4px">Open New Matter</div>
+    <div style="font-size:13px;color:var(--tx3);margin-bottom:18px">Holingu Lawyers · Port Moresby, Papua New Guinea</div>
+    <div class="field"><label class="flbl">Matter Title</label><input class="fi" id="m-title" placeholder="e.g. Waigani Commercial Centre — Sale & Purchase"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field"><label class="flbl">Matter Type</label><select class="fs" id="m-type"><option value="deed">Deed</option><option value="deal">Deal</option><option value="contract">Contract</option><option value="mining">Mining</option><option value="litigation">Litigation</option><option value="advisory">Advisory</option></select></div>
+      <div class="field"><label class="flbl">Value (PGK)</label><input class="fi" id="m-value" placeholder="0.00" type="number"/></div>
+    </div>
+    <div class="field"><label class="flbl">Governing Law</label><select class="fs" id="m-law"><option>Laws of Papua New Guinea</option><option>Land Act (PNG) Chapter 185</option><option>Mining Act (PNG) 1992</option><option>Companies Act (PNG) 1997</option></select></div>
+    <div style="display:flex;gap:9px;margin-top:6px">
+      <button class="btn" style="flex:1" onclick="closeModal()">Cancel</button>
+      <button class="btn pr" style="flex:2" onclick="createMatter()">Open Matter</button>
+    </div>
+    <div id="modal-result"></div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────
+// API base — auto-detects: same origin in prod, localhost in dev
+const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:8000'
+  : window.location.origin;
+
+// ─── STATE ────────────────────────────────────────────────────────────────
+let screen = 'dashboard';
+let vaultFilter = 'all';
+let analystTab = 'docs';
+let selectedTmpl = null;
+let dashData = null;
+let matters = [];
+let risks = [];
+let deadlines = [];
+let charts = {};
+let searchTimer = null;
+
+const SCREENS = {
+  dashboard: {t:'Intelligence Dashboard',      s:'Firm-wide analytical overview · Port Moresby'},
+  vault:     {t:'The Vault',                   s:'Matter & document repository'},
+  analyst:   {t:'The Analyst',                 s:'AI extraction & semantic search'},
+  drafter:   {t:'The Drafter',                 s:'PNG-compliant precedent templates'},
+  deadlines: {t:'Deadlines & Risk Register',   s:'Clause alerts & firm calendar'},
+};
+
+// ─── API HELPERS ──────────────────────────────────────────────────────────
+async function api(path, opts={}) {
+  try {
+    const r = await fetch(API + path, {headers:{'Content-Type':'application/json'}, ...opts});
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } catch(e) {
+    console.error('API error:', path, e.message);
+    return null;
+  }
+}
+
+async function checkAPI() {
+  const h = await api('/health');
+  const el = document.getElementById('api-status');
+  if (h) { el.textContent = '⬤ live'; el.style.color = 'var(--gn)'; el.style.background = 'rgba(74,155,111,.1)'; el.style.borderColor = 'rgba(74,155,111,.25)'; }
+  else    { el.textContent = '⬤ offline'; el.style.color = 'var(--rd)'; }
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────
+function goTo(s) {
+  screen = s;
+  document.querySelectorAll('.ni').forEach(el => el.classList.remove('active'));
+  const ni = document.getElementById('nav-' + s);
+  if (ni) ni.classList.add('active');
+  document.getElementById('screen-title').textContent = SCREENS[s].t;
+  document.getElementById('screen-sub').textContent   = SCREENS[s].s;
+  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} });
+  charts = {};
+  render();
+}
+
+function openModal()  { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────
+function badge(t) {
+  if (!t) return '';
+  const cls = {deed:'b-deed',deal:'b-deal',contract:'b-hold',active:'b-active',closed:'b-closed',
+                on_hold:'b-hold',hold:'b-hold',high:'b-crit',medium:'b-med',low:'b-low',
+                critical:'b-crit',analysed:'b-active',processing:'b-hold',pending:'b-closed',
+                pending_analysis:'b-closed',mining:'b-mining',advisory:'b-deed',litigation:'b-crit'};
+  return `<span class="badge ${cls[t]||'b-closed'}">${t.replace(/_/g,' ')}</span>`;
+}
+
+function pgk(v) {
+  if (!v) return '—';
+  if (v >= 1e6) return `PGK ${(v/1e6).toFixed(1)}M`;
+  if (v >= 1e3) return `PGK ${(v/1e3).toFixed(0)}K`;
+  return `PGK ${v.toLocaleString()}`;
+}
+
+function skel(n=3) {
+  return `<div class="loading-card">${Array(n).fill('<div class="skeleton"></div>').join('')}</div>`;
+}
+
+// ─── SIDEBAR MATTERS ──────────────────────────────────────────────────────
+async function loadSidebar() {
+  const data = await api('/api/matters?status=active');
+  if (!data) return;
+  matters = data;
+  const el = document.getElementById('sidebar-matters');
+  el.innerHTML = data.slice(0,5).map(m => `
+    <div style="padding:6px 9px;border-radius:3px;cursor:pointer;margin-bottom:2px;transition:background .15s" 
+         onmouseover="this.style.background='var(--ink3)'" onmouseout="this.style.background=''"
+         onclick="goTo('vault')">
+      <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--tx3)">${m.matter_ref}</div>
+      <div style="font-size:10px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;margin-top:1px">${m.title}</div>
+    </div>`).join('');
+
+  // Update risk badge
+  const rdata = await api('/api/risks/summary');
+  if (rdata) {
+    document.getElementById('risk-badge').textContent = rdata.total_open || 0;
+  }
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────
+async function render() {
+  const ct = document.getElementById('content');
+  ct.innerHTML = skel(4);
+  switch(screen) {
+    case 'dashboard': await renderDashboard(ct); break;
+    case 'vault':     await renderVault(ct);     break;
+    case 'analyst':   await renderAnalyst(ct);   break;
+    case 'drafter':   renderDrafter(ct);         break;
+    case 'deadlines': await renderDeadlines(ct); break;
+  }
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────
+async function renderDashboard(ct) {
+  const data = await api('/api/analytics/dashboard');
+  if (!data) { ct.innerHTML = `<div style="padding:30px;color:var(--tx3);font-family:'DM Mono',monospace;font-size:12px;text-align:center">⚠ Could not connect to API. Start the backend server.</div>`; return; }
+  dashData = data;
+  const s = data.stats;
+
+  ct.innerHTML = `
+  <div class="sg">
+    ${[
+      {l:'Active Matters',  v:s.active_matters,       d:'Matters under way',           dc:'up', c:'1'},
+      {l:'Total Value',     v:pgk(s.total_value_pgk),  d:'Active portfolio value',      dc:'up', c:'2'},
+      {l:'Risk Alerts',     v:s.risk_alerts,           d:`${s.critical_risks} critical`, dc:'dn', c:'3'},
+      {l:'Deadlines',       v:s.open_deadlines,        d:`${s.deadlines_30d} in 30 days`,dc:'am', c:'4'},
+    ].map(x=>`
+    <div class="sc s${x.c}">
+      <div class="sl">${x.l}</div>
+      <div class="sv" style="font-size:${String(x.v).length>7?16:String(x.v).length>4?20:26}px">${x.v}</div>
+      <div class="sd ${x.dc}">${x.d}</div>
+    </div>`).join('')}
+  </div>
+  <div class="g75" style="margin-bottom:14px">
+    <div class="card" style="margin-bottom:0">
+      <div class="ch"><div class="ct">Deal Flow — PGK Portfolio</div><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3)">by matter opened</span></div>
+      <div style="padding:12px 4px 8px"><canvas id="areaChart" height="170"></canvas></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ch"><div class="ct">Matter Types</div></div>
+      <div style="padding:14px 8px 8px">
+        <canvas id="pieChart" height="145"></canvas>
+        <div style="display:flex;justify-content:center;gap:14px;margin-top:8px">
+          ${(data.by_type||[]).map((t,i)=>`
+          <div style="display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px">
+            <div style="width:7px;height:7px;border-radius:50%;background:${['#D4A84B','#6E4A9B','#4A6E9B','#4A9B6F','#9B4A4A'][i%5]}"></div>
+            <span style="color:var(--tx2)">${t.matter_type} (${t.count})</span>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card" style="margin-bottom:0">
+      <div class="ch"><div class="ct">Upcoming Deadlines</div><span class="badge b-crit">${(data.critical_deadlines||[]).filter(d=>d.is_critical).length} urgent</span></div>
+      ${(data.critical_deadlines||[]).map(d => {
+        const dt = new Date(d.due_date); const day=dt.getDate(); const mon=dt.toLocaleString('en',{month:'short'});
+        return `<div class="dli">
+          <div class="dldb" style="${d.is_critical?'border-color:rgba(155,74,74,.4)':''}">
+            <div class="dlday" style="${d.is_critical?'color:var(--rd)':''}">${day}</div>
+            <div class="dlmon">${mon}</div>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;color:var(--tx);line-height:1.4;margin-bottom:2px">${d.label}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3)">${d.matter_ref}</div>
+          </div>
+          ${d.is_critical?`<span class="badge b-crit">!</span>`:''}
+        </div>`;
+      }).join('') || '<div style="padding:14px 16px;font-size:12px;color:var(--tx3)">No upcoming deadlines</div>'}
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ch"><div class="ct">Risk Alerts</div><span class="badge b-crit">${s.risk_alerts} open</span></div>
+      ${(data.top_risks||[]).map(r=>`
+      <div class="ri">
+        <div class="rdot ${r.severity==='critical'||r.severity==='high'?'rh':'rm'}"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;color:var(--tx);margin-bottom:2px">${r.description.substring(0,60)}…</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3)">${r.matter_ref} · ${r.clause_ref||''}</div>
+        </div>
+        ${badge(r.severity)}
+      </div>`).join('') || '<div style="padding:14px 16px;font-size:12px;color:var(--tx3)">No open risks</div>'}
+    </div>
+  </div>`;
+
+  // Charts
+  setTimeout(() => {
+    const aCtx = document.getElementById('areaChart');
+    const pCtx = document.getElementById('pieChart');
+    if (aCtx && data.deal_flow?.length) {
+      charts.area = new Chart(aCtx, {
+        type:'line',
+        data:{labels:data.deal_flow.map(d=>d.month), datasets:[{data:data.deal_flow.map(d=>d.value_pgk/1e6),borderColor:'#D4A84B',borderWidth:2,fill:true,backgroundColor:'rgba(212,168,75,0.1)',tension:0.4,pointRadius:3,pointBackgroundColor:'#D4A84B'}]},
+        options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`PGK ${c.raw.toFixed(1)}M`},backgroundColor:'#0D1117',titleColor:'#D4A84B',bodyColor:'#E2DDD4',borderColor:'#263040',borderWidth:1}},scales:{x:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#4A5260',font:{family:'DM Mono',size:9}}},y:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#4A5260',font:{family:'DM Mono',size:9},callback:v=>`${v}M`}}}}
+      });
+    }
+    if (pCtx && data.by_type?.length) {
+      const COLORS = ['#D4A84B','#6E4A9B','#4A6E9B','#4A9B6F','#9B4A4A'];
+      charts.pie = new Chart(pCtx, {
+        type:'doughnut',
+        data:{labels:data.by_type.map(t=>t.matter_type),datasets:[{data:data.by_type.map(t=>t.count),backgroundColor:COLORS,borderWidth:0,hoverOffset:4}]},
+        options:{plugins:{legend:{display:false},tooltip:{backgroundColor:'#0D1117',titleColor:'#D4A84B',bodyColor:'#E2DDD4',borderColor:'#263040',borderWidth:1}},cutout:'60%'}
+      });
+    }
+  }, 60);
+}
+
+// ─── VAULT ────────────────────────────────────────────────────────────────
+async function renderVault(ct) {
+  let url = '/api/matters';
+  if (vaultFilter !== 'all') url += `?matter_type=${vaultFilter}`;
+  const data = await api(url);
+  if (!data) return;
+
+  ct.innerHTML = `
+  <div style="display:flex;gap:8px;margin-bottom:13px;align-items:center;flex-wrap:wrap">
+    <div class="chip-row" style="margin-bottom:0">
+      ${['all','deal','deed','contract','mining'].map(f=>`
+      <div class="chip ${vaultFilter===f?'active':''}" onclick="vaultFilter='${f}';goTo('vault')">${f==='all'?'All':f.charAt(0).toUpperCase()+f.slice(1)+'s'}</div>`).join('')}
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:6px;background:var(--ink3);border:1px solid var(--bdr);border-radius:4px;padding:6px 11px">
+      <span style="color:var(--tx3);font-size:14px">⌕</span>
+      <input placeholder="Filter…" id="vault-q" oninput="filterTable()" style="background:none;border:none;outline:none;font-family:'Crimson Pro',serif;font-size:13px;color:var(--tx);width:140px;caret-color:var(--gold)"/>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Ref</th><th>Matter Title</th><th>Type</th><th>Status</th><th>Value (PGK)</th><th>Client</th><th>Partner</th><th>Risks</th></tr></thead>
+        <tbody id="vault-body">
+          ${data.map(m=>`
+          <tr onclick="goTo('vault')">
+            <td><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--gold)">${m.matter_ref}</span></td>
+            <td style="color:var(--tx);max-width:240px">${m.title}</td>
+            <td>${badge(m.matter_type)}</td>
+            <td>${badge(m.status)}</td>
+            <td style="font-family:'DM Mono',monospace;font-size:10px">${pgk(m.value_pgk)}</td>
+            <td style="font-size:11px;color:var(--tx3);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.client_name||'—'}</td>
+            <td>${m.partner_name||'—'}</td>
+            <td>${m.open_risks>0?`<span class="badge b-crit">${m.open_risks}</span>`:'<span class="badge b-active">0</span>'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function filterTable() {
+  const q = document.getElementById('vault-q')?.value.toLowerCase() || '';
+  document.querySelectorAll('#vault-body tr').forEach(tr => {
+    tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ─── ANALYST ──────────────────────────────────────────────────────────────
+async function renderAnalyst(ct) {
+  const tabs = [['docs','Documents'],['ext','Extraction'],['sem','Semantic Search']];
+  ct.innerHTML = `
+  <div class="tab-row">${tabs.map(([id,lbl])=>`<button class="tbtn ${analystTab===id?'active':''}" onclick="analystTab='${id}';goTo('analyst')">${lbl}</button>`).join('')}</div>
+  <div id="analyst-body">${skel(3)}</div>`;
+
+  const body = document.getElementById('analyst-body');
+  if (analystTab === 'docs') {
+    const docs = await api('/api/documents');
+    const stats = await api('/api/vault/stats');
+    body.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+      ${[
+        {l:'Total Documents',v:stats?.total_documents||0,sub:`${stats?.total_pages||0} pages total`},
+        {l:'Analysed',v:stats?.analysed||0,sub:`${stats?.parties_extracted||0} parties extracted`},
+        {l:'Pending',v:stats?.pending||0,sub:'Awaiting AI pipeline'},
+      ].map(x=>`
+      <div style="background:var(--ink2);border:1px solid var(--bdr);border-radius:5px;padding:14px 13px">
+        <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--tx3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:6px">${x.l}</div>
+        <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--tx);margin-bottom:3px">${x.v}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3)">${x.sub}</div>
+      </div>`).join('')}
+    </div>
+    <div class="card" style="margin-bottom:0">
+      ${(docs||[]).map(d=>`
+      <div class="li">
+        <div style="width:32px;height:38px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:${d.doc_type==='deed'?'rgba(110,74,155,.15)':'rgba(212,168,75,.1)'};border:1px solid ${d.doc_type==='deed'?'rgba(110,74,155,.3)':'rgba(212,168,75,.25)'}">
+          ${d.doc_type==='deed'?'📜':'📊'}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;color:var(--tx);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.original_name}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3)">${d.page_count||'?'}pp · ${d.matter_ref}</div>
+        </div>
+        ${badge(d.analysis_status)}
+      </div>`).join('')}
+    </div>`;
+  } else if (analystTab === 'ext') {
+    const docs = await api('/api/documents?analysis_status=analysed');
+    body.innerHTML = `
+    <div class="sec-lbl">AI-Extracted Parties (Verified)</div>
+    ${(docs||[]).slice(0,3).map(d=>`
+    <div class="ar">
+      <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--gold);margin-bottom:4px">${d.doc_ref} · ${d.matter_ref}</div>
+      <div style="font-size:12px;color:var(--tx);margin-bottom:3px">${d.original_name}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3)">${d.page_count}pp · Status: ${d.analysis_status}</div>
+    </div>`).join('')}
+    <div class="sec-lbl" style="margin-top:16px">Visit /api/documents/{doc_ref} for full extracted parties, financials & risk flags</div>
+    <div style="background:var(--ink3);border:1px solid var(--bdr2);border-radius:4px;padding:13px 15px;font-family:'DM Mono',monospace;font-size:10px;color:var(--tx2);line-height:1.8">
+      GET /api/documents/DOC-2024-0001<br/>
+      → parties[], financials[], dates[], risk_flags[]<br/><br/>
+      GET /api/vault/search?q=indemnity<br/>
+      → Full-text semantic search across all documents
+    </div>`;
+  } else {
+    body.innerHTML = `
+    <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--tx);margin-bottom:4px">Semantic Search</div>
+    <div style="font-size:13px;color:var(--tx3);margin-bottom:14px;line-height:1.5">Search by meaning across the entire PNG matter vault.</div>
+    <div class="sbar" style="margin-bottom:16px">
+      <span style="color:var(--gold);font-size:16px">⌕</span>
+      <input id="sem-q" placeholder="e.g. deeds with unusual indemnity clauses under PNG law" style="width:100%;background:none;border:none;outline:none;font-family:'Crimson Pro',serif;font-size:14px;color:var(--tx);caret-color:var(--gold)" onkeydown="if(event.key==='Enter')doSearch()"/>
+    </div>
+    <button class="btn pr" onclick="doSearch()" style="margin-bottom:16px">Search Vault</button>
+    <div id="sem-results"></div>`;
+  }
+}
+
+async function doSearch() {
+  const q = document.getElementById('sem-q')?.value;
+  if (!q) return;
+  document.getElementById('sem-results').innerHTML = skel(2);
+  const data = await api(`/api/vault/search?q=${encodeURIComponent(q)}`);
+  const el = document.getElementById('sem-results');
+  if (!data?.results?.length) { el.innerHTML = `<div style="color:var(--tx3);font-family:'DM Mono',monospace;font-size:11px">No results for "${q}"</div>`; return; }
+  el.innerHTML = `<div class="sec-lbl">${data.count} result(s) for "${q}"</div>` +
+    data.results.map(r=>`
+    <div style="background:var(--ink2);border:1px solid var(--bdr);border-radius:4px;padding:15px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:12px;color:var(--tx);flex:1;padding-right:8px">${r.original_name}</div>
+        ${badge(r.doc_type)}
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3)">${r.matter_ref} · ${r.matter_title}</div>
+    </div>`).join('');
+}
+
+// ─── DRAFTER ──────────────────────────────────────────────────────────────
+const TMPLS = [
+  {id:1,name:'State Lease Transfer',  sub:'Land Act Ch. 185',    icon:'📋'},
+  {id:2,name:'Sale & Purchase Deed',  sub:'Residential/Comm.',   icon:'🏠'},
+  {id:3,name:'Commercial Lease',      sub:'NCD Properties',      icon:'🔑'},
+  {id:4,name:'Confidentiality Deed',  sub:'Mutual / One-way',    icon:'🔒'},
+  {id:5,name:'Share Purchase Agmt.',  sub:'Business Acquisition', icon:'📈'},
+  {id:6,name:'Loan Agreement',        sub:'Secured / Unsecured',  icon:'🏦'},
+];
+let drafterDone = false;
+
+function renderDrafter(ct) {
+  ct.innerHTML = `
+  <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--tx);margin-bottom:4px">PNG Precedent Templates</div>
+  <div style="font-size:13px;color:var(--tx3);margin-bottom:18px;line-height:1.5">Generate documents from Holingu's standard precedents. All templates conform to the <strong style="color:var(--tx2)">Laws of Papua New Guinea</strong>.</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+    ${TMPLS.map(t=>`
+    <div style="background:var(--ink3);border:1px solid ${selectedTmpl===t.id?'var(--gold)':'var(--bdr)'};border-radius:4px;padding:16px 12px;cursor:pointer;text-align:center;transition:all .15s;background:${selectedTmpl===t.id?'var(--gf)':'var(--ink3)'}" onclick="selectedTmpl=${t.id};renderDrafter(document.getElementById('content'))">
+      <div style="font-size:26px;margin-bottom:8px">${t.icon}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:13px;color:var(--tx);margin-bottom:2px">${t.name}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">${t.sub}</div>
+    </div>`).join('')}
+  </div>
+  ${selectedTmpl?`
+  <div class="card" style="padding:22px;margin-bottom:0">
+    <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--tx);margin-bottom:18px">Configure — ${TMPLS.find(t=>t.id===selectedTmpl)?.name}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field"><label class="flbl">Transferor / Vendor</label><input class="fi" placeholder="e.g. John Kopi Naime"/></div>
+      <div class="field"><label class="flbl">Transferee / Purchaser</label><input class="fi" placeholder="e.g. Pacific Development Ltd."/></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field"><label class="flbl">Consideration (PGK)</label><input class="fi" placeholder="e.g. 1,500,000" type="number"/></div>
+      <div class="field"><label class="flbl">Settlement Date</label><input class="fi" type="date"/></div>
+    </div>
+    <div class="field"><label class="flbl">State Lease / Vol. & Folio</label><input class="fi" placeholder="e.g. Vol. 34 Fol. 88 — Granville, NCD"/></div>
+    <div class="field"><label class="flbl">Governing Law</label>
+      <select class="fs">
+        <option>Laws of Papua New Guinea</option>
+        <option>Land Act (PNG) Chapter 185</option>
+        <option>Companies Act (PNG) 1997</option>
+        <option>Mining Act (PNG) 1992</option>
+      </select>
+    </div>
+    <div class="field"><label class="flbl">IPA Registration / TIN</label><input class="fi" placeholder="e.g. IPA Reg: 1-84721 / TIN: 203-847-192"/></div>
+    <div style="display:flex;gap:9px;margin-top:4px">
+      <button class="btn pr" style="flex:1" id="gen-btn" onclick="generateDoc()">⊕ Generate Document</button>
+      <button class="btn" onclick="selectedTmpl=null;renderDrafter(document.getElementById('content'))">✕ Cancel</button>
+    </div>
+    ${drafterDone?`<div class="notice-ok"><p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--gn)">✓ Document generated — Draft v1.docx ready for partner review</p></div>`:''}
+  </div>`:''}`;
+}
+
+function generateDoc() {
+  const btn = document.getElementById('gen-btn');
+  if (!btn) return;
+  btn.innerHTML = '<span class="pulsing">◎ Generating…</span>';
+  btn.disabled = true;
+  setTimeout(() => { drafterDone = true; renderDrafter(document.getElementById('content')); }, 2200);
+}
+
+// ─── DEADLINES ────────────────────────────────────────────────────────────
+async function renderDeadlines(ct) {
+  const [dl, rs] = await Promise.all([api('/api/deadlines?days_ahead=120'), api('/api/risks?status=open')]);
+
+  ct.innerHTML = `
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card" style="margin-bottom:0">
+      <div class="ch"><div class="ct">Upcoming Deadlines</div><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3)">${dl?.length||0} total</span></div>
+      ${(dl||[]).map(d=>{
+        const dt = new Date(d.due_date); const day=dt.getDate(); const mon=dt.toLocaleString('en',{month:'short'});
+        return `<div class="dli">
+          <div class="dldb" style="${d.is_critical?'border-color:rgba(155,74,74,.4)':''}">
+            <div class="dlday" style="${d.is_critical?'color:var(--rd)':''}">${day}</div>
+            <div class="dlmon">${mon}</div>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;color:var(--tx);margin-bottom:2px;line-height:1.4">${d.label}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3)">${d.matter_ref} · ${d.clause_ref||''}</div>
+          </div>
+          ${d.is_critical?`<span class="badge b-crit">urgent</span>`:`<span class="badge b-hold">soon</span>`}
+        </div>`;
+      }).join('') || '<div style="padding:14px 16px;color:var(--tx3);font-size:12px">No upcoming deadlines</div>'}
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ch"><div class="ct">Risk Flag Register</div><span class="badge b-crit">${rs?.length||0} active</span></div>
+      ${(rs||[]).map(r=>`
+      <div class="ri">
+        <div class="rdot ${r.severity==='critical'||r.severity==='high'?'rh':'rm'}"></div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px;gap:6px">
+            <span style="font-size:12px;color:var(--tx);flex:1">${r.description.substring(0,55)}…</span>${badge(r.severity)}
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3)">${r.matter_ref} · ${r.clause_ref||''}</div>
+        </div>
+      </div>`).join('') || '<div style="padding:14px 16px;color:var(--tx3);font-size:12px">No open risk flags</div>'}
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="ch"><div class="ct">Matter Value Analytics — PGK</div></div>
+    <div style="padding:12px 4px 8px"><canvas id="barChart" height="165"></canvas></div>
+  </div>`;
+
+  setTimeout(async () => {
+    const va = await api('/api/analytics/value');
+    const ctx = document.getElementById('barChart');
+    if (!ctx || !va?.by_type) return;
+    charts.bar = new Chart(ctx, {
+      type:'bar',
+      data:{labels:va.by_type.map(t=>t.matter_type),datasets:[{data:va.by_type.map(t=>t.value/1e6),backgroundColor:'rgba(212,168,75,0.65)',borderRadius:3,borderSkipped:false}]},
+      options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`PGK ${c.raw.toFixed(1)}M`},backgroundColor:'#0D1117',titleColor:'#D4A84B',bodyColor:'#E2DDD4',borderColor:'#263040',borderWidth:1}},scales:{x:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#4A5260',font:{family:'DM Mono',size:9}}},y:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#4A5260',font:{family:'DM Mono',size:9},callback:v=>`${v}M`}}}}
+    });
+  }, 80);
+}
+
+// ─── NEW MATTER ───────────────────────────────────────────────────────────
+async function createMatter() {
+  const title = document.getElementById('m-title').value;
+  if (!title) return;
+  const mtype = document.getElementById('m-type').value;
+  const value = parseFloat(document.getElementById('m-value').value) || null;
+  const law   = document.getElementById('m-law').value;
+  const ref   = `HLG-${new Date().getFullYear()}-${String(Math.floor(Math.random()*900)+100)}`;
+
+  const res = await api('/api/matters', {
+    method:'POST',
+    body: JSON.stringify({matter_ref:ref, title, matter_type:mtype, value_pgk:value, governing_law:law})
+  });
+
+  document.getElementById('modal-result').innerHTML = res
+    ? `<div class="notice-ok"><p>✓ Matter ${res.matter_ref} opened successfully</p></div>`
+    : `<div style="color:var(--rd);font-family:'DM Mono',monospace;font-size:10px;margin-top:10px">⚠ Could not create matter — check API connection</div>`;
+
+  if (res) { setTimeout(() => { closeModal(); loadSidebar(); }, 1400); }
+}
+
+// ─── SEARCH ───────────────────────────────────────────────────────────────
+function debounceSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(async () => {
+    const q = document.getElementById('global-search').value;
+    if (q.length < 2) return;
+    vaultFilter = 'all';
+    goTo('vault');
+    const ct = document.getElementById('content');
+    ct.innerHTML = skel(3);
+    const data = await api(`/api/matters?search=${encodeURIComponent(q)}`);
+    if (!data) return;
+    matters = data;
+    await renderVault(ct);
+  }, 400);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+checkAPI();
+loadSidebar();
+render();
+</script>
+</body>
+</html>
