@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 from database import get_db
 import sqlite3
+import auth
 
 router = APIRouter()
 def row_to_dict(row): return dict(row) if row else None
@@ -37,7 +38,7 @@ def list_risks(
     return [row_to_dict(r) for r in db.execute(sql, params).fetchall()]
 
 @router.get("/summary")
-def risk_summary(db: sqlite3.Connection = Depends(get_db)):
+def risk_summary(db: sqlite3.Connection = Depends(get_db), current_user: dict = Depends(auth.get_current_user)):
     cur = db.execute("SELECT severity, COUNT(*) as count FROM risk_flags WHERE status='open' GROUP BY severity")
     by_sev = {r["severity"]: r["count"] for r in cur.fetchall()}
     cur2 = db.execute("SELECT flag_type, COUNT(*) as count FROM risk_flags WHERE status='open' GROUP BY flag_type ORDER BY count DESC")

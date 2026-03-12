@@ -42,6 +42,7 @@ def init_db():
         email         TEXT NOT NULL UNIQUE,
         full_name     TEXT NOT NULL,
         display_name  TEXT NOT NULL,
+        password_hash TEXT,
         role          TEXT NOT NULL CHECK(role IN ('senior_partner','partner','associate','paralegal','admin')),
         admission_no  TEXT,
         tin           TEXT,
@@ -271,14 +272,18 @@ def init_db():
 
 def _seed(conn, cur):
     """Insert initial data for Holingu Lawyers PNG."""
+    # Using a fixed hash for 'kilomike@2026' for seeding
+    admin_pw_hash = "$2b$12$Wa4Io0MyEegltqwUR0H21.bbVslxiS6fpdApuIUv9jWBJtLYtCbOe"
+
     users = [
-        ("a.holingu@holingu.pg","Advocate A. Holingu","A. Holingu","senior_partner","PNG/BAR/2001/0045","501-847-001","+675 7201 4567"),
-        ("p.naime@holingu.pg","Philip Naime","P. Naime","partner","PNG/BAR/2008/0112","501-847-002","+675 7301 2345"),
-        ("r.kaupa@holingu.pg","Rachel Kaupa","R. Kaupa","partner","PNG/BAR/2010/0178","501-847-003","+675 7401 3456"),
-        ("t.mondo@holingu.pg","Thomas Mondo","T. Mondo","associate","PNG/BAR/2018/0344","501-847-004","+675 7501 4567"),
-        ("admin@holingu.pg","System Administrator","Admin","admin",None,None,"+675 7601 5678"),
+        ("a.holingu@holingu.pg","Advocate A. Holingu","A. Holingu",None,"senior_partner","PNG/BAR/2001/0045","501-847-001","+675 7201 4567"),
+        ("p.naime@holingu.pg","Philip Naime","P. Naime",None,"partner","PNG/BAR/2008/0112","501-847-002","+675 7301 2345"),
+        ("r.kaupa@holingu.pg","Rachel Kaupa","R. Kaupa",None,"partner","PNG/BAR/2010/0178","501-847-003","+675 7401 3456"),
+        ("t.mondo@holingu.pg","Thomas Mondo","T. Mondo",None,"associate","PNG/BAR/2018/0344","501-847-004","+675 7501 4567"),
+        ("admin@holingu.pg","System Administrator","Admin",None,"admin",None,None,"+675 7601 5678"),
+        ("kmaisan@dspng.tech", "K. Maisan", "K. Maisan", admin_pw_hash, "admin", None, None, None)
     ]
-    cur.executemany("INSERT OR IGNORE INTO users (email,full_name,display_name,role,admission_no,tin,phone) VALUES (?,?,?,?,?,?,?)", users)
+    cur.executemany("INSERT OR IGNORE INTO users (email,full_name,display_name,password_hash,role,admission_no,tin,phone) VALUES (?,?,?,?,?,?,?,?)", users)
 
     clients = [
         ("CLT-001","Ela Beach Holdings Ltd.","company","1-84721","203-001-001","Level 5, Mogoru Moto, Champion Parade","Port Moresby","NCD"),

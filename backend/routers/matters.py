@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from database import get_db
 import sqlite3
+import auth
 
 router = APIRouter()
 
@@ -36,7 +37,8 @@ def list_matters(
     status: Optional[str] = None,
     matter_type: Optional[str] = None,
     search: Optional[str] = None,
-    db: sqlite3.Connection = Depends(get_db)
+    db: sqlite3.Connection = Depends(get_db),
+    current_user: dict = Depends(auth.get_current_user)
 ):
     sql = """
         SELECT m.*, c.name AS client_name, c.ipa_reg_no,

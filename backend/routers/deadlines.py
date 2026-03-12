@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional
 from database import get_db
 import sqlite3
+import auth
 
 router = APIRouter()
 def row_to_dict(row): return dict(row) if row else None
@@ -11,7 +12,8 @@ def list_deadlines(
     days_ahead: Optional[int] = 90,
     critical_only: Optional[bool] = False,
     matter_id: Optional[int] = None,
-    db: sqlite3.Connection = Depends(get_db)
+    db: sqlite3.Connection = Depends(get_db),
+    current_user: dict = Depends(auth.get_current_user)
 ):
     sql = """
         SELECT ed.*, m.matter_ref, m.title AS matter_title,

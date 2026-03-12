@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends
 from database import get_db
 import sqlite3
+import auth
 
 router = APIRouter()
 def row_to_dict(row): return dict(row) if row else None
 
 @router.get("/dashboard")
-def dashboard(db: sqlite3.Connection = Depends(get_db)):
+def dashboard_analytics(db: sqlite3.Connection = Depends(get_db), current_user: dict = Depends(auth.get_current_user)):
     """Full dashboard payload for the Intelligence Dashboard screen."""
 
     # Top stats
@@ -77,7 +78,7 @@ def dashboard(db: sqlite3.Connection = Depends(get_db)):
     }
 
 @router.get("/value")
-def value_analytics(db: sqlite3.Connection = Depends(get_db)):
+def value_analytics(db: sqlite3.Connection = Depends(get_db), current_user: dict = Depends(auth.get_current_user)):
     """Total matter value breakdown in PGK."""
     return {
         "by_status": [row_to_dict(r) for r in db.execute(
