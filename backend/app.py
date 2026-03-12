@@ -13,10 +13,15 @@ import os
 from database import init_db
 from routers import matters, documents, clients, users, risks, deadlines, analytics, vault
 
+# Use absolute paths relative to this file's location
+_here = os.path.dirname(os.path.abspath(__file__))
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
-    upload_dir = os.environ.get("UPLOAD_DIR", "./uploads")
+    # Default to /data/uploads for persistent storage, fallback to local uploads
+    _default_upload_dir = "/data/uploads" if os.path.exists("/data") else os.path.join(_here, "uploads")
+    upload_dir = os.environ.get("UPLOAD_DIR", _default_upload_dir)
     os.makedirs(upload_dir, exist_ok=True)
     yield
 
@@ -46,8 +51,7 @@ app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"]
 app.include_router(vault.router,     prefix="/api/vault",     tags=["Vault"])
 
 # ── Frontend static files ─────────────────────────────────────────────────────
-# backend/ is cwd; frontend/ is at ../frontend
-_here = os.path.dirname(os.path.abspath(__file__))
+# backend/ is _here; frontend/ is at ../frontend
 frontend_dir = os.path.normpath(os.path.join(_here, "..", "frontend"))
 
 if os.path.isdir(frontend_dir):
