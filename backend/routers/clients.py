@@ -1,13 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional
+from sqlalchemy.orm import Session
+from sqlalchemy import text
 from database import get_db
-import sqlite3
 import auth
 
 router = APIRouter()
 
-def row_to_dict(row): return dict(row) if row else None
+def row_to_dict(row): return dict(row._mapping) if row else None
 
 class ClientCreate(BaseModel):
     client_code: str
@@ -28,34 +29,39 @@ class ClientCreate(BaseModel):
 def list_clients(
     client_type: Optional[str] = None,
     search: Optional[str] = None,
-    db: sqlite3.Connection = Depends(get_db),
+    db: Session = Depends(get_db),
     current_user: dict = Depends(auth.get_current_user)
 ):
     sql = "SELECT c.*, (SELECT COUNT(*) FROM matters m WHERE m.client_id=c.id) AS matter_count FROM clients c WHERE c.is_active=1"
-    params = []
-    if client_type: sql += " AND c.client_type=?"; params.append(client_type)
-    if search:      sql += " AND (c.name LIKE ? OR c.ipa_reg_no LIKE ? OR c.tin LIKE ?)"; params += [f"%{search}%"]*3
+    params = {}
+    if client_type:
+        sql += " AND c.client_type=:client_type"
+        params["client_type"] = client_type
+    if search:
+        sql += " AND (c.name LIKE :search OR c.ipa_reg_no LIKE :search OR c.tin LIKE :search)"
+        params["search"] = f"%{search}%"
     sql += " ORDER BY c.name"
-    return [row_to_dict(r) for r in db.execute(sql, params).fetchall()]
+    result = db.execute(text(sql), params)
+    return [row_to_dict(r) for r in result.fetchall()]
 
 @router.get("/{client_code}")
-def get_client(client_code: str, db: sqlite3.Connection = Depends(get_db)):
-    cur = db.execute("SELECT * FROM clients WHERE client_code=?", (client_code,))
-    client = row_to_dict(cur.fetchone())
+def get_client(client_code: str, db: Session = Depends(get_db)):
+    result = db.execute(text("SELECT * FROM clients WHERE client_code=:client_code"), {"client_code": client_code})
+    client = row_to_dict(result.fetchone())
     if not client: raise HTTPException(status_code=404, detail="Client not found")
-    client["matters"] = [row_to_dict(r) for r in db.execute(
-        "SELECT matter_ref,title,matter_type,status,value_pgk FROM matters WHERE client_id=? ORDER BY created_at DESC", (client["id"],)).fetchall()]
+
+    matters_result = db.execute(text("SELECT matter_ref,title,matter_type,status,value_pgk FROM matters WHERE client_id=:client_id ORDER BY created_at DESC"), {"client_id": client["id"]})
+    client["matters"] = [row_to_dict(r) for r in matters_result.fetchall()]
     return client
 
 @router.post("", status_code=201)
-def create_client(client: ClientCreate, db: sqlite3.Connection = Depends(get_db)):
+def create_client(client: ClientCreate, db: Session = Depends(get_db)):
     try:
-        db.execute("""INSERT INTO clients (client_code,name,client_type,ipa_reg_no,tin,address,city,province,country,contact_name,contact_email,contact_phone,notes)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-            (client.client_code, client.name, client.client_type, client.ipa_reg_no, client.tin,
-             client.address, client.city, client.province, client.country,
-             client.contact_name, client.contact_email, client.contact_phone, client.notes))
+        db.execute(text("""INSERT INTO clients (client_code,name,client_type,ipa_reg_no,tin,address,city,province,country,contact_name,contact_email,contact_phone,notes)
+            VALUES (:client_code,:name,:client_type,:ipa_reg_no,:tin,:address,:city,:province,:country,:contact_name,:contact_email,:contact_phone,:notes)"""),
+            client.dict())
         db.commit()
         return get_client(client.client_code, db)
-    except sqlite3.IntegrityError:
-        raise HTTPException(status_code=409, detail="Client code already exists")
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=f"Error creating client: {str(e)}")

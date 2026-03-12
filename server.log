@@ -1,0 +1,18 @@
+INFO:     Started server process [41014]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+✓ Database initialised with sqlite:////app/backend/database/holingu_vault.db
+INFO:     127.0.0.1:47686 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44498 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44464 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37334 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38384 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36326 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50060 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50060 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60258 - "GET / HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [41014]
