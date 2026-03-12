@@ -1,8 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from pydantic import BaseModel
 from typing import Optional
+from sqlalchemy.orm import Session
+from sqlalchemy import text
 from database import get_db
-import sqlite3, hashlib, os, shutil
+import hashlib, os, shutil
 import auth
 
 router = APIRouter()
@@ -11,7 +13,7 @@ UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "./uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)  # Created at startup; /data/uploads on Render
 
 def row_to_dict(row):
-    return dict(row) if row else None
+    return dict(row._mapping) if row else None
 
 class DocCreate(BaseModel):
     matter_id: int
@@ -29,7 +31,7 @@ def list_documents(
     matter_id: Optional[int] = None,
     analysis_status: Optional[str] = None,
     doc_type: Optional[str] = None,
-    db: sqlite3.Connection = Depends(get_db),
+    db: Session = Depends(get_db),
     current_user: dict = Depends(auth.get_current_user)
 ):
     sql = """
@@ -42,52 +44,59 @@ def list_documents(
         LEFT JOIN document_embeddings de ON de.document_id = d.id
         WHERE 1=1
     """
-    params = []
-    if matter_id:       sql += " AND d.matter_id=?";        params.append(matter_id)
-    if analysis_status: sql += " AND d.analysis_status=?";  params.append(analysis_status)
-    if doc_type:        sql += " AND d.doc_type=?";         params.append(doc_type)
+    params = {}
+    if matter_id:
+        sql += " AND d.matter_id=:matter_id"
+        params["matter_id"] = matter_id
+    if analysis_status:
+        sql += " AND d.analysis_status=:analysis_status"
+        params["analysis_status"] = analysis_status
+    if doc_type:
+        sql += " AND d.doc_type=:doc_type"
+        params["doc_type"] = doc_type
     sql += " ORDER BY d.created_at DESC"
-    return [row_to_dict(r) for r in db.execute(sql, params).fetchall()]
+    result = db.execute(text(sql), params)
+    return [row_to_dict(r) for r in result.fetchall()]
 
 @router.get("/pipeline")
-def pipeline_status(db: sqlite3.Connection = Depends(get_db)):
+def pipeline_status(db: Session = Depends(get_db)):
     """Document analysis pipeline overview."""
-    cur = db.execute("""
+    result = db.execute(text("""
         SELECT d.analysis_status, COUNT(*) as count, SUM(d.page_count) as total_pages
         FROM documents d GROUP BY d.analysis_status
-    """)
-    return {"pipeline": [row_to_dict(r) for r in cur.fetchall()]}
+    """))
+    return {"pipeline": [row_to_dict(r) for r in result.fetchall()]}
 
 @router.get("/{doc_ref}")
-def get_document(doc_ref: str, db: sqlite3.Connection = Depends(get_db)):
-    cur = db.execute("SELECT * FROM documents WHERE doc_ref=?", (doc_ref,))
-    doc = row_to_dict(cur.fetchone())
+def get_document(doc_ref: str, db: Session = Depends(get_db)):
+    result = db.execute(text("SELECT * FROM documents WHERE doc_ref=:doc_ref"), {"doc_ref": doc_ref})
+    doc = row_to_dict(result.fetchone())
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
-    doc["parties"]    = [row_to_dict(r) for r in db.execute("SELECT * FROM extracted_parties WHERE document_id=?", (doc["id"],)).fetchall()]
-    doc["financials"] = [row_to_dict(r) for r in db.execute("SELECT * FROM extracted_financials WHERE document_id=?", (doc["id"],)).fetchall()]
-    doc["dates"]      = [row_to_dict(r) for r in db.execute("SELECT * FROM extracted_dates WHERE document_id=?", (doc["id"],)).fetchall()]
-    doc["risks"]      = [row_to_dict(r) for r in db.execute("SELECT * FROM risk_flags WHERE document_id=?", (doc["id"],)).fetchall()]
+    doc["parties"]    = [row_to_dict(r) for r in db.execute(text("SELECT * FROM extracted_parties WHERE document_id=:doc_id"), {"doc_id": doc["id"]}).fetchall()]
+    doc["financials"] = [row_to_dict(r) for r in db.execute(text("SELECT * FROM extracted_financials WHERE document_id=:doc_id"), {"doc_id": doc["id"]}).fetchall()]
+    doc["dates"]      = [row_to_dict(r) for r in db.execute(text("SELECT * FROM extracted_dates WHERE document_id=:doc_id"), {"doc_id": doc["id"]}).fetchall()]
+    doc["risks"]      = [row_to_dict(r) for r in db.execute(text("SELECT * FROM risk_flags WHERE document_id=:doc_id"), {"doc_id": doc["id"]}).fetchall()]
     return doc
 
 @router.post("", status_code=201)
-def create_document(doc: DocCreate, db: sqlite3.Connection = Depends(get_db)):
+def create_document(doc: DocCreate, db: Session = Depends(get_db)):
     try:
-        db.execute("""
+        db.execute(text("""
             INSERT INTO documents (matter_id,doc_ref,filename,original_name,doc_type,version,page_count,file_size_kb,uploaded_by)
-            VALUES (?,?,?,?,?,?,?,?,?)
-        """, (doc.matter_id, doc.doc_ref, doc.filename, doc.original_name,
-              doc.doc_type, doc.version, doc.page_count, doc.file_size_kb, doc.uploaded_by))
+            VALUES (:matter_id,:doc_ref,:filename,:original_name,:doc_type,:version,:page_count,:file_size_kb,:uploaded_by)
+        """), doc.dict())
         db.commit()
         return get_document(doc.doc_ref, db)
-    except sqlite3.IntegrityError:
-        raise HTTPException(status_code=409, detail="Document ref already exists")
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=f"Error creating document: {str(e)}")
 
 @router.post("/upload/{matter_ref}")
-async def upload_document(matter_ref: str, file: UploadFile = File(...), db: sqlite3.Connection = Depends(get_db)):
+async def upload_document(matter_ref: str, file: UploadFile = File(...), db: Session = Depends(get_db)):
     """Upload a PDF to the vault and queue for analysis."""
-    cur = db.execute("SELECT id FROM matters WHERE matter_ref=?", (matter_ref,))
-    matter = cur.fetchone()
+    result = db.execute(text("SELECT id FROM matters WHERE matter_ref=:matter_ref"), {"matter_ref": matter_ref})
+    matter = row_to_dict(result.fetchone())
     if not matter:
         raise HTTPException(status_code=404, detail="Matter not found")
 
@@ -100,23 +109,25 @@ async def upload_document(matter_ref: str, file: UploadFile = File(...), db: sql
         f.write(content)
 
     # Auto-generate doc ref
-    cur = db.execute("SELECT COUNT(*) FROM documents")
-    count = cur.fetchone()[0] + 1
+    count_result = db.execute(text("SELECT COUNT(*) FROM documents"))
+    count = count_result.scalar() + 1
     doc_ref = f"DOC-{2024}-{count:04d}"
 
-    db.execute("""
+    db.execute(text("""
         INSERT INTO documents (matter_id,doc_ref,filename,original_name,doc_type,file_size_kb,storage_path,checksum_sha256,analysis_status)
-        VALUES (?,?,?,?,?,?,?,?,'pending')
-    """, (matter["id"], doc_ref, safe_name, file.filename, "other",
-          len(content)//1024, file_path, checksum))
+        VALUES (:matter_id,:doc_ref,:filename,:original_name,:doc_type,:file_size_kb,:storage_path,:checksum_sha256,'pending')
+    """), {"matter_id": matter["id"], "doc_ref": doc_ref, "filename": safe_name,
+          "original_name": file.filename, "doc_type": "other",
+          "file_size_kb": len(content)//1024, "storage_path": file_path, "checksum_sha256": checksum})
     db.commit()
     return {"doc_ref": doc_ref, "filename": file.filename, "status": "pending", "size_kb": len(content)//1024}
 
 @router.patch("/{doc_ref}/status")
-def update_analysis_status(doc_ref: str, body: dict, db: sqlite3.Connection = Depends(get_db)):
+def update_analysis_status(doc_ref: str, body: dict, db: Session = Depends(get_db)):
     new_status = body.get("analysis_status")
     if new_status not in ("pending","processing","analysed","failed","archived"):
         raise HTTPException(status_code=400, detail="Invalid status")
-    db.execute("UPDATE documents SET analysis_status=?, updated_at=datetime('now') WHERE doc_ref=?", (new_status, doc_ref))
+    db.execute(text("UPDATE documents SET analysis_status=:analysis_status, updated_at=CURRENT_TIMESTAMP WHERE doc_ref=:doc_ref"),
+               {"analysis_status": new_status, "doc_ref": doc_ref})
     db.commit()
     return {"doc_ref": doc_ref, "analysis_status": new_status}

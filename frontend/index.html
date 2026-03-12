@@ -169,6 +169,7 @@ tbody tr{transition:background .1s;cursor:pointer}tbody tr:hover{background:var(
       <div class="ni" onclick="goTo('analyst')"   id="nav-analyst"><span>◎</span><span>The Analyst</span></div>
       <div class="ni" onclick="goTo('drafter')"   id="nav-drafter"><span>✦</span><span>The Drafter</span></div>
       <div class="ni" onclick="goTo('deadlines')" id="nav-deadlines"><span>⚑</span><span>Deadlines & Risks</span><span class="ni-badge" id="risk-badge">—</span></div>
+      <div class="ni" onclick="goTo('users')"     id="nav-users" style="display:none"><span>🛡</span><span>User Management</span></div>
       <div class="divider"></div>
       <div class="nav-lbl" style="margin-bottom:8px">Recent Matters</div>
       <div id="sidebar-matters"><div style="padding:6px 9px;font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3)">Loading…</div></div>
@@ -196,6 +197,31 @@ tbody tr{transition:background .1s;cursor:pointer}tbody tr:hover{background:var(
       <button class="btn pr">↑ Upload PDF</button>
     </div>
     <div class="content" id="content"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="user-modal" onclick="if(event.target===this)closeUserModal()">
+  <div class="modal-box">
+    <div style="font-family:'Playfair Display',serif;font-size:19px;color:var(--tx);margin-bottom:4px" id="user-modal-title">Add New User</div>
+    <div style="font-size:13px;color:var(--tx3);margin-bottom:18px">Firm Member Management · Port Moresby</div>
+    <input type="hidden" id="u-id"/>
+    <div class="field"><label class="flbl">Full Name</label><input class="fi" id="u-full-name" placeholder="e.g. Jonathan Holingu"/></div>
+    <div class="field"><label class="flbl">Display Name</label><input class="fi" id="u-display-name" placeholder="e.g. Adv. J. Holingu"/></div>
+    <div class="field"><label class="flbl">Email Address</label><input class="fi" id="u-email" type="email" placeholder="jonathan@holingu.com"/></div>
+    <div class="field"><label class="flbl">Role</label>
+      <select class="fs" id="u-role">
+        <option value="senior_partner">Senior Partner</option>
+        <option value="partner">Partner</option>
+        <option value="associate">Associate</option>
+        <option value="staff">Staff</option>
+      </select>
+    </div>
+    <div class="field" id="u-pass-field"><label class="flbl">Password</label><input class="fi" id="u-password" type="password" placeholder="Default: Holingu2024"/></div>
+    <div style="display:flex;gap:9px;margin-top:6px">
+      <button class="btn" style="flex:1" onclick="closeUserModal()">Cancel</button>
+      <button class="btn pr" style="flex:2" onclick="saveUser()">Save User</button>
+    </div>
+    <div id="user-modal-result"></div>
   </div>
 </div>
 
@@ -256,6 +282,7 @@ const SCREENS = {
   analyst:   {t:'The Analyst',                 s:'AI extraction & semantic search'},
   drafter:   {t:'The Drafter',                 s:'PNG-compliant precedent templates'},
   deadlines: {t:'Deadlines & Risk Register',   s:'Clause alerts & firm calendar'},
+  users:     {t:'User Management',             s:'Manage firm members & administrative access'},
 };
 
 // ─── API HELPERS ──────────────────────────────────────────────────────────
@@ -362,6 +389,7 @@ async function render() {
     case 'analyst':   await renderAnalyst(ct);   break;
     case 'drafter':   renderDrafter(ct);         break;
     case 'deadlines': await renderDeadlines(ct); break;
+    case 'users':     await renderUsers(ct);     break;
   }
 }
 
@@ -783,6 +811,101 @@ function updateUserUI() {
     document.getElementById('user-name').textContent = user.full_name;
     document.getElementById('user-role').textContent = user.role.replace('_', ' ');
     document.getElementById('user-avatar').textContent = user.full_name.split(' ').map(n=>n[0]).join('').toUpperCase();
+
+    // Show admin navigation if permitted
+    const adminEmails = ["kmaisan@dspng.tech", "jonathan@holingu.com"];
+    if (adminEmails.includes(user.email) || user.role === 'senior_partner') {
+      const el = document.getElementById('nav-users');
+      if (el) el.style.display = 'flex';
+    }
+  }
+}
+
+// ─── USERS (ADMIN) ────────────────────────────────────────────────────────
+async function renderUsers(ct) {
+  const data = await api('/api/users');
+  if (!data) return;
+
+  ct.innerHTML = `
+  <div class="header-row" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div class="sec-lbl" style="margin-bottom:0">${data.length} Firm Members</div>
+    <button class="btn pr" onclick="openUserModal()">+ Add User</button>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${data.map(u=>`
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="avatar" style="width:24px;height:24px;font-size:9px">${u.full_name.split(' ').map(n=>n[0]).join('').toUpperCase()}</div>
+                <div style="color:var(--tx)">${u.full_name}</div>
+              </div>
+            </td>
+            <td>${u.email}</td>
+            <td>${badge(u.role)}</td>
+            <td>${u.is_active ? '<span class="badge b-active">Active</span>' : '<span class="badge b-closed">Inactive</span>'}</td>
+            <td>
+              <button class="btn" style="padding:4px 8px;font-size:10px" onclick='openUserModal(${JSON.stringify(u)})'>Edit</button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function openUserModal(u = null) {
+  document.getElementById('user-modal').classList.add('open');
+  const title = document.getElementById('user-modal-title');
+  const passField = document.getElementById('u-pass-field');
+  document.getElementById('user-modal-result').innerHTML = '';
+
+  if (u) {
+    title.textContent = 'Edit User';
+    document.getElementById('u-id').value = u.id;
+    document.getElementById('u-full-name').value = u.full_name;
+    document.getElementById('u-display-name').value = u.display_name;
+    document.getElementById('u-email').value = u.email;
+    document.getElementById('u-role').value = u.role;
+    passField.style.display = 'none';
+  } else {
+    title.textContent = 'Add New User';
+    document.getElementById('u-id').value = '';
+    document.getElementById('u-full-name').value = '';
+    document.getElementById('u-display-name').value = '';
+    document.getElementById('u-email').value = '';
+    document.getElementById('u-role').value = 'associate';
+    passField.style.display = 'block';
+  }
+}
+
+function closeUserModal() { document.getElementById('user-modal').classList.remove('open'); }
+
+async function saveUser() {
+  const id = document.getElementById('u-id').value;
+  const data = {
+    full_name: document.getElementById('u-full-name').value,
+    display_name: document.getElementById('u-display-name').value,
+    email: document.getElementById('u-email').value,
+    role: document.getElementById('u-role').value,
+  };
+
+  let res;
+  if (id) {
+    res = await api(\`/api/users/\${id}\`, { method: 'PATCH', body: JSON.stringify(data) });
+  } else {
+    data.password = document.getElementById('u-password').value || 'Holingu2024';
+    res = await api('/api/users', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  if (res) {
+    document.getElementById('user-modal-result').innerHTML = \`<div class="notice-ok"><p>✓ User saved successfully</p></div>\`;
+    setTimeout(() => { closeUserModal(); render(); }, 1200);
+  } else {
+    document.getElementById('user-modal-result').innerHTML = \`<div style="color:var(--rd);font-size:10px;margin-top:10px">⚠ Error saving user</div>\`;
   }
 }
 
