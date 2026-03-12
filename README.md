@@ -23,12 +23,12 @@ Full-stack legal document management system built for Holingu Lawyers.
 holingu-lawyers/
 ├── render.yaml              ← Render deployment config
 ├── Procfile                 ← Fallback start command
+├── requirements.txt         ← Python dependencies
 ├── README.md
 │
 ├── backend/
-│   ├── main.py              ← FastAPI app entry point
+│   ├── app.py               ← FastAPI app logic
 │   ├── database.py          ← SQLite init + seed data
-│   ├── requirements.txt     ← Python dependencies
 │   └── routers/
 │       ├── matters.py       ← /api/matters
 │       ├── documents.py     ← /api/documents
@@ -90,10 +90,9 @@ holingu-lawyers/
 1. New Web Service on Render
 2. **Runtime:** Python 3
 3. **Region:** Singapore (closest to Port Moresby)
-4. **Root Directory:** `backend`
-5. **Build Command:** `pip install -r requirements.txt`
-6. **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
-7. **Add Disk:** Mount path `/opt/render/project/src/backend`, 1 GB
+4. **Build Command:** `pip install -r requirements.txt`
+5. **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
+6. **Add Disk:** Mount path `/data`, 1 GB
 
 ### Environment Variables
 
@@ -108,7 +107,6 @@ holingu-lawyers/
 
 ```bash
 # 1. Install dependencies
-cd backend
 pip install -r requirements.txt
 
 # 2. Start the API server

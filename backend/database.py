@@ -7,7 +7,12 @@ import sqlite3
 import os
 from typing import Generator
 
-DB_PATH = os.environ.get("DATABASE_PATH", "./database/holingu_vault.db")
+# Use absolute paths relative to this file's location
+_here = os.path.dirname(os.path.abspath(__file__))
+# Default to /data/holingu_vault.db for persistent storage, fallback to local directory
+_default_db_path = "/data/holingu_vault.db" if os.path.exists("/data") else os.path.normpath(os.path.join(_here, "database", "holingu_vault.db"))
+
+DB_PATH = os.environ.get("DATABASE_PATH", _default_db_path)
 
 def get_connection():
     db_dir = os.path.dirname(DB_PATH)
@@ -261,7 +266,7 @@ def init_db():
 
     conn.commit()
     conn.close()
-    print("✓ Database initialised")
+    print(f"✓ Database initialised at {DB_PATH}")
 
 
 def _seed(conn, cur):
