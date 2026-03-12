@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 from database import get_db
 import sqlite3, hashlib, os, shutil
+import auth
 
 router = APIRouter()
 
@@ -28,7 +29,8 @@ def list_documents(
     matter_id: Optional[int] = None,
     analysis_status: Optional[str] = None,
     doc_type: Optional[str] = None,
-    db: sqlite3.Connection = Depends(get_db)
+    db: sqlite3.Connection = Depends(get_db),
+    current_user: dict = Depends(auth.get_current_user)
 ):
     sql = """
         SELECT d.*, m.matter_ref, m.title AS matter_title,

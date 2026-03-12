@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from typing import Optional
 from database import get_db
 import sqlite3
+import auth
 
 router = APIRouter()
 def row_to_dict(row): return dict(row) if row else None
@@ -12,7 +13,8 @@ def vault_search(
     matter_type: Optional[str] = None,
     doc_type: Optional[str] = None,
     limit: int = 10,
-    db: sqlite3.Connection = Depends(get_db)
+    db: sqlite3.Connection = Depends(get_db),
+    current_user: dict = Depends(auth.get_current_user)
 ):
     """
     Full-text keyword search across the document vault.

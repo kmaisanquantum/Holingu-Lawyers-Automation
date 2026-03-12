@@ -3,10 +3,37 @@ from pydantic import BaseModel
 from typing import Optional
 from database import get_db
 import sqlite3
+import auth
 
 router = APIRouter()
 
 def row_to_dict(row): return dict(row) if row else None
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@router.post("/login")
+def login(req: LoginRequest, db: sqlite3.Connection = Depends(get_db)):
+    cur = db.execute("SELECT id, email, password_hash, full_name, role FROM users WHERE email=? AND is_active=1", (req.email,))
+    user = row_to_dict(cur.fetchone())
+
+    if not user or not auth.verify_password(req.password, user.get("password_hash")):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    # Create token
+    access_token = auth.create_access_token(data={"sub": user["email"], "role": user["role"], "id": user["id"]})
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user["id"],
+            "email": user["email"],
+            "full_name": user["full_name"],
+            "role": user["role"]
+        }
+    }
 
 @router.get("")
 def list_users(db: sqlite3.Connection = Depends(get_db)):

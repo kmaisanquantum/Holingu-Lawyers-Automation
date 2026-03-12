@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 from database import get_db
 import sqlite3
+import auth
 
 router = APIRouter()
 
@@ -27,7 +28,8 @@ class ClientCreate(BaseModel):
 def list_clients(
     client_type: Optional[str] = None,
     search: Optional[str] = None,
-    db: sqlite3.Connection = Depends(get_db)
+    db: sqlite3.Connection = Depends(get_db),
+    current_user: dict = Depends(auth.get_current_user)
 ):
     sql = "SELECT c.*, (SELECT COUNT(*) FROM matters m WHERE m.client_id=c.id) AS matter_count FROM clients c WHERE c.is_active=1"
     params = []
