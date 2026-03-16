@@ -207,7 +207,7 @@ tbody tr{transition:background .1s;cursor:pointer}tbody tr:hover{background:var(
     <input type="hidden" id="u-id"/>
     <div class="field"><label class="flbl">Full Name</label><input class="fi" id="u-full-name" placeholder="e.g. Jonathan Holingu"/></div>
     <div class="field"><label class="flbl">Display Name</label><input class="fi" id="u-display-name" placeholder="e.g. Adv. J. Holingu"/></div>
-    <div class="field"><label class="flbl">Email Address</label><input class="fi" id="u-email" type="email" placeholder="jonathan@holingu.com"/></div>
+    <div class="field"><label class="flbl">Username or Email</label><input class="fi" id="u-email" type="email" placeholder="jonathan@holingu.com"/></div>
     <div class="field"><label class="flbl">Role</label>
       <select class="fs" id="u-role">
         <option value="senior_partner">Senior Partner</option>
@@ -231,7 +231,7 @@ tbody tr{transition:background .1s;cursor:pointer}tbody tr:hover{background:var(
     <div style="font-family:'Playfair Display',serif;font-size:19px;color:var(--tx);margin-bottom:4px;text-align:center">Holingu Vault Login</div>
     <div style="font-size:13px;color:var(--tx3);margin-bottom:24px;text-align:center">Analytical Repository · Port Moresby</div>
     <div id="login-error" style="color:var(--rd);font-family:'DM Mono',monospace;font-size:10px;margin-bottom:12px;text-align:center;display:none"></div>
-    <div class="field"><label class="flbl">Email Address</label><input class="fi" id="l-email" type="email" placeholder="kmaisan@dspng.tech"/></div>
+    <div class="field"><label class="flbl">Username or Email</label><input class="fi" id="l-email" type="email" placeholder="kmaisan@dspng.tech"/></div>
     <div class="field"><label class="flbl">Password</label><input class="fi" id="l-password" type="password" placeholder="••••••••"/></div>
     <button class="btn pr" style="width:100%;margin-top:10px;padding:11px" onclick="doLogin()">Sign In</button>
   </div>
@@ -814,7 +814,7 @@ function updateUserUI() {
 
     // Show admin navigation if permitted
     const adminEmails = ["kmaisan@dspng.tech", "jonathan@holingu.com"];
-    if (adminEmails.includes(user.email) || user.role === 'senior_partner') {
+    if (adminEmails.includes(user.email) || user.role === 'senior_partner' || user.role === 'admin') {
       const el = document.getElementById('nav-users');
       if (el) el.style.display = 'flex';
     }
@@ -895,17 +895,17 @@ async function saveUser() {
 
   let res;
   if (id) {
-    res = await api(\`/api/users/\${id}\`, { method: 'PATCH', body: JSON.stringify(data) });
+    res = await api(`/api/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
   } else {
     data.password = document.getElementById('u-password').value || 'Holingu2024';
     res = await api('/api/users', { method: 'POST', body: JSON.stringify(data) });
   }
 
   if (res) {
-    document.getElementById('user-modal-result').innerHTML = \`<div class="notice-ok"><p>✓ User saved successfully</p></div>\`;
+    document.getElementById('user-modal-result').innerHTML = `<div class="notice-ok"><p>✓ User saved successfully</p></div>`;
     setTimeout(() => { closeUserModal(); render(); }, 1200);
   } else {
-    document.getElementById('user-modal-result').innerHTML = \`<div style="color:var(--rd);font-size:10px;margin-top:10px">⚠ Error saving user</div>\`;
+    document.getElementById('user-modal-result').innerHTML = `<div style="color:var(--rd);font-size:10px;margin-top:10px">⚠ Error saving user</div>`;
   }
 }
 

@@ -560,7 +560,7 @@ def init_db():
 def _seed(conn):
     """Insert initial data for Holingu Lawyers PNG."""
     from auth import get_password_hash
-    admin_pw_hash = get_password_hash("kilomike@2026")
+    admin_pw_hash = get_password_hash("kilomike@2024")
 
     users = [
         {"email":"a.holingu@holingu.pg", "full_name":"Advocate A. Holingu", "display_name":"A. Holingu", "password_hash":None, "role":"senior_partner", "admission_no":"PNG/BAR/2001/0045", "tin":"501-847-001", "phone":"+675 7201 4567"},
