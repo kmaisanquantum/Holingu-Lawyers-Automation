@@ -563,8 +563,6 @@ def _seed(conn):
     admin_pw_hash = get_password_hash("kilomike@2024")
 
     users = [
-        {"email":"a.holingu@holingu.pg", "full_name":"Advocate A. Holingu", "display_name":"A. Holingu", "password_hash":None, "role":"senior_partner", "admission_no":"PNG/BAR/2001/0045", "tin":"501-847-001", "phone":"+675 7201 4567"},
-        {"email":"p.naime@holingu.pg", "full_name":"Philip Naime", "display_name":"P. Naime", "password_hash":None, "role":"partner", "admission_no":"PNG/BAR/2008/0112", "tin":"501-847-002", "phone":"+675 7301 2345"},
         {"email":"kmaisan@dspng.tech", "full_name":"K. Maisan", "display_name":"K. Maisan", "password_hash":admin_pw_hash, "role":"admin", "admission_no":None, "tin":None, "phone":None},
         {"email":"jonathan@holingu.com", "full_name":"Jonathan Holingu", "display_name":"Jonathan", "password_hash":None, "role":"associate", "admission_no":"PNG/BAR/2026/0001", "tin":None, "phone":None}
     ]
