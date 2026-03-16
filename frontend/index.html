@@ -232,7 +232,7 @@ tbody tr{transition:background .1s;cursor:pointer}tbody tr:hover{background:var(
     <div style="font-size:13px;color:var(--tx3);margin-bottom:24px;text-align:center">Analytical Repository · Port Moresby</div>
     <div id="login-error" style="color:var(--rd);font-family:'DM Mono',monospace;font-size:10px;margin-bottom:12px;text-align:center;display:none"></div>
     <div class="field"><label class="flbl">Username or Email</label><input class="fi" id="l-email" type="email" placeholder="kmaisan@dspng.tech"/></div>
-    <div class="field"><label class="flbl">Password</label><input class="fi" id="l-password" type="password" placeholder="••••••••"/></div>
+    <div class="field"><label class="flbl">Password</label><input class="fi" id="l-password" type="password" placeholder="••••••••" onkeyup="if(event.key==='Enter')doLogin()"/></div>
     <button class="btn pr" style="width:100%;margin-top:10px;padding:11px" onclick="doLogin()">Sign In</button>
   </div>
 </div>
@@ -773,6 +773,8 @@ function debounceSearch() {
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────
 async function doLogin() {
+  document.getElementById("login-error").style.display = "none";
+  document.getElementById("login-error").textContent = "";
   const email = document.getElementById('l-email').value;
   const password = document.getElementById('l-password').value;
   const errEl = document.getElementById('login-error');
@@ -798,29 +800,45 @@ async function doLogin() {
   }
 }
 
+
 function logout() {
   token = null;
   user = null;
-  localStorage.removeItem('holingu_token');
-  localStorage.removeItem('holingu_user');
-  document.getElementById('login-modal').classList.add('open');
+  matters = [];
+  risks = [];
+  deadlines = [];
+  dashData = null;
+  localStorage.removeItem("holingu_token");
+  localStorage.removeItem("holingu_user");
+  updateUserUI();
+  const sb = document.getElementById("sidebar-matters");
+  if (sb) sb.innerHTML = "";
+  const ct = document.getElementById("content");
+  if (ct) ct.innerHTML = "";
+  document.getElementById("login-modal").classList.add("open");
 }
 
 function updateUserUI() {
+  const el = document.getElementById("nav-users");
   if (user) {
-    document.getElementById('user-name').textContent = user.full_name;
-    document.getElementById('user-role').textContent = user.role.replace('_', ' ');
-    document.getElementById('user-avatar').textContent = user.full_name.split(' ').map(n=>n[0]).join('').toUpperCase();
+    document.getElementById("user-name").textContent = user.full_name;
+    document.getElementById("user-role").textContent = user.role.replace("_", " ");
+    document.getElementById("user-avatar").textContent = user.full_name.split(" ").map(n=>n[0]).join("").toUpperCase();
 
     // Show admin navigation if permitted
     const adminEmails = ["kmaisan@dspng.tech", "jonathan@holingu.com"];
-    if (adminEmails.includes(user.email) || user.role === 'senior_partner' || user.role === 'admin') {
-      const el = document.getElementById('nav-users');
-      if (el) el.style.display = 'flex';
+    if (adminEmails.includes(user.email) || user.role === "senior_partner" || user.role === "admin") {
+      if (el) el.style.display = "flex";
+    } else {
+      if (el) el.style.display = "none";
     }
+  } else {
+    document.getElementById("user-name").textContent = "Guest";
+    document.getElementById("user-role").textContent = "";
+    document.getElementById("user-avatar").textContent = "?";
+    if (el) el.style.display = "none";
   }
 }
-
 // ─── USERS (ADMIN) ────────────────────────────────────────────────────────
 async function renderUsers(ct) {
   const data = await api('/api/users');
