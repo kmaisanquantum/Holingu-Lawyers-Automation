@@ -52,9 +52,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return payload
 
 async def require_admin(current_user: dict = Depends(get_current_user)):
-    # Check if user email matches the requested admin email or has a senior_partner role
+    # Allow IT Admin role, senior partners, or hardcoded admin emails
     admin_emails = ["kmaisan@dspng.tech", "jonathan@holingu.com"]
-    if current_user.get("sub") not in admin_emails and current_user.get("role") != "senior_partner":
+    user_role = current_user.get("role")
+    user_email = current_user.get("sub")
+
+    if user_role not in ["admin", "senior_partner"] and user_email not in admin_emails:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Operation not permitted. Administrative rights required."
