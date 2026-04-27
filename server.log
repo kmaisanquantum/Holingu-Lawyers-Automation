@@ -1,0 +1,14 @@
+INFO:     Started server process [72686]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+✓ Seed data inserted
+✓ Database initialised with sqlite:////app/backend/database/holingu_vault.db
+INFO:     127.0.0.1:39692 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39692 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39698 - "GET /api/matters?status=active HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:39712 - "GET /api/analytics/dashboard HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:39712 - "POST /api/users/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39712 - "GET /api/matters?status=active HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39698 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39712 - "GET /api/risks/summary HTTP/1.1" 200 OK
