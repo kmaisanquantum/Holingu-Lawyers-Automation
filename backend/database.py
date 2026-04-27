@@ -563,7 +563,7 @@ def _seed(conn):
     admin_pw_hash = get_password_hash("kilomike@2024")
 
     users = [
-        {"email":"kmaisan@dspng.tech", "full_name":"K. Maisan", "display_name":"K. Maisan", "password_hash":admin_pw_hash, "role":"admin", "admission_no":None, "tin":None, "phone":None},
+        {"email":"user@holingu.com", "full_name":"K. Maisan", "display_name":"K. Maisan", "password_hash":admin_pw_hash, "role":"admin", "admission_no":None, "tin":None, "phone":None},
         {"email":"jonathan@holingu.com", "full_name":"Jonathan Holingu", "display_name":"Jonathan", "password_hash":None, "role":"associate", "admission_no":"PNG/BAR/2026/0001", "tin":None, "phone":None}
     ]
 
