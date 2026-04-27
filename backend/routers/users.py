@@ -27,6 +27,7 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     display_name: Optional[str] = None
     role: Optional[str] = None
+    password: Optional[str] = None
     is_active: Optional[int] = None
     admission_no: Optional[str] = None
     phone: Optional[str] = None
@@ -74,11 +75,14 @@ def create_user(user: UserCreate, db: Session = Depends(get_db), admin: dict = D
 
 @router.patch("/{user_id}")
 def update_user(user_id: int, update: UserUpdate, db: Session = Depends(get_db), admin: dict = Depends(auth.require_admin)):
-    fields = {k: v for k, v in update.dict().items() if v is not None}
-    if not fields: raise HTTPException(status_code=400, detail="Nothing to update")
+    data = update.dict(exclude_unset=True)
+    if not data: raise HTTPException(status_code=400, detail="Nothing to update")
 
-    set_clause = ", ".join(f"{k}=:{k}" for k in fields)
-    params = {**fields, "id": user_id}
+    if "password" in data:
+        data["password_hash"] = auth.get_password_hash(data.pop("password"))
+
+    set_clause = ", ".join(f"{k}=:{k}" for k in data)
+    params = {**data, "id": user_id}
 
     db.execute(text(f"UPDATE users SET {set_clause} WHERE id=:id"), params)
     db.commit()
