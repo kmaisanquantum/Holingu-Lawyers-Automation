@@ -826,7 +826,7 @@ function updateUserUI() {
     document.getElementById("user-avatar").textContent = user.full_name.split(" ").map(n=>n[0]).join("").toUpperCase();
 
     // Show admin navigation if permitted
-    const adminEmails = ["user@holingu.com", "jonathan@holingu.com"];
+    const adminEmails = ["user@holingu.com", "kmaisan@dspng.tech", "jonathan@holingu.com"];
     if (adminEmails.includes(user.email) || user.role === "senior_partner" || user.role === "admin") {
       if (el) el.style.display = "flex";
     } else {

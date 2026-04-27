@@ -560,11 +560,14 @@ def init_db():
 def _seed(conn):
     """Insert initial data for Holingu Lawyers PNG."""
     from auth import get_password_hash
-    admin_pw_hash = get_password_hash("kilomike@2024")
+    kmaisan_pw_hash = get_password_hash("kilomike@2024")
+    jonathan_pw_hash = get_password_hash("JH@2026")
+    user_pw_hash = get_password_hash("kilomike@2024")
 
     users = [
-        {"email":"user@holingu.com", "full_name":"K. Maisan", "display_name":"K. Maisan", "password_hash":admin_pw_hash, "role":"admin", "admission_no":None, "tin":None, "phone":None},
-        {"email":"jonathan@holingu.com", "full_name":"Jonathan Holingu", "display_name":"Jonathan", "password_hash":None, "role":"associate", "admission_no":"PNG/BAR/2026/0001", "tin":None, "phone":None}
+        {"email":"user@holingu.com", "full_name":"Holingu User", "display_name":"User", "password_hash":user_pw_hash, "role":"admin", "admission_no":None, "tin":None, "phone":None},
+        {"email":"kmaisan@dspng.tech", "full_name":"K. Maisan", "display_name":"K. Maisan", "password_hash":kmaisan_pw_hash, "role":"admin", "admission_no":None, "tin":None, "phone":None},
+        {"email":"jonathan@holingu.com", "full_name":"Jonathan Holingu", "display_name":"Jonathan", "password_hash":jonathan_pw_hash, "role":"associate", "admission_no":"PNG/BAR/2026/0001", "tin":None, "phone":None}
     ]
 
     for u in users:
