@@ -879,6 +879,7 @@ function openUserModal(u = null) {
   document.getElementById('user-modal').classList.add('open');
   const title = document.getElementById('user-modal-title');
   const passField = document.getElementById('u-pass-field');
+  const passLabel = passField.querySelector('.flbl');
   document.getElementById('user-modal-result').innerHTML = '';
 
   if (u) {
@@ -888,8 +889,10 @@ function openUserModal(u = null) {
     document.getElementById('u-display-name').value = u.display_name;
     document.getElementById('u-email').value = u.email;
     document.getElementById('u-role').value = u.role;
-    passField.style.display = 'none';
+    document.getElementById('u-password').value = '';
+    passLabel.textContent = 'New Password (leave blank to keep current)';
   } else {
+    passLabel.textContent = 'Password';
     title.textContent = 'Add New User';
     document.getElementById('u-id').value = '';
     document.getElementById('u-full-name').value = '';
@@ -913,6 +916,8 @@ async function saveUser() {
 
   let res;
   if (id) {
+    const pass = document.getElementById('u-password').value;
+    if (pass) data.password = pass;
     res = await api(`/api/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
   } else {
     data.password = document.getElementById('u-password').value || 'Holingu2024';
