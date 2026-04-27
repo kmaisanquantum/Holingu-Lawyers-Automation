@@ -1,9 +1,61 @@
-INFO:     Started server process [55423]
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [55423]
+INFO:     Started server process [135624]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 ✓ Database initialised with sqlite:////app/backend/database/holingu_vault.db
-INFO:     127.0.0.1:34848 - "GET / HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34848 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39576 - "GET /api/matters?status=active HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:34848 - "GET /api/analytics/dashboard HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:53974 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53974 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53978 - "GET /api/matters?status=active HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:53986 - "GET /api/analytics/dashboard HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:53986 - "POST /api/users/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53986 - "GET /api/matters?status=active HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53978 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53986 - "GET /api/risks/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53986 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53978 - "GET /api/matters?status=active HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53974 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53974 - "GET /api/risks/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52126 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52126 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52142 - "GET /api/matters?status=active HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:52154 - "GET /api/analytics/dashboard HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:52154 - "POST /api/users/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52154 - "GET /api/matters?status=active HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52142 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52142 - "GET /api/risks/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52144 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52144 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52164 - "GET /api/analytics/dashboard HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:52150 - "GET /api/matters?status=active HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:52150 - "POST /api/users/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52150 - "GET /api/matters?status=active HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52164 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52150 - "GET /api/risks/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49638 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49638 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49640 - "GET /api/matters?status=active HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:49656 - "GET /api/analytics/dashboard HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:49656 - "POST /api/users/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49656 - "GET /api/matters?status=active HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49640 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49656 - "GET /api/risks/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49664 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49664 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49684 - "GET /api/analytics/dashboard HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:49670 - "GET /api/matters?status=active HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:49670 - "POST /api/users/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49670 - "GET /api/matters?status=active HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49684 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49670 - "GET /api/risks/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52964 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52964 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52974 - "GET /api/matters?status=active HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:52984 - "GET /api/analytics/dashboard HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:52984 - "POST /api/users/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52984 - "GET /api/matters?status=active HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52974 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52984 - "GET /api/risks/summary HTTP/1.1" 200 OK

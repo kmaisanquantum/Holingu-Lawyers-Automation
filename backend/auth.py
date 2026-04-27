@@ -53,7 +53,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 async def require_admin(current_user: dict = Depends(get_current_user)):
     # Allow IT Admin role, senior partners, or hardcoded admin emails
-    admin_emails = ["user@holingu.com", "jonathan@holingu.com"]
+    admin_emails = ["user@holingu.com", "kmaisan@dspng.tech", "jonathan@holingu.com"]
     user_role = current_user.get("role")
     user_email = current_user.get("sub")
 
