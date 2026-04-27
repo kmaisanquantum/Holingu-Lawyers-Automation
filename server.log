@@ -1,0 +1,9 @@
+INFO:     Started server process [55423]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+✓ Database initialised with sqlite:////app/backend/database/holingu_vault.db
+INFO:     127.0.0.1:34848 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34848 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39576 - "GET /api/matters?status=active HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:34848 - "GET /api/analytics/dashboard HTTP/1.1" 401 Unauthorized
